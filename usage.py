@@ -1,11 +1,19 @@
-patchPredictions = predictor.getPredictions(patchProbabilities)
+nClasses = 10
 
-(patchAccuracy, patchMisclassified) = accuracyCalculator.Calc(patchPredictions, patchLabels)
-patchConfusionMatrix = confusionMatrix.generate(patchPredictions, patchLabels)
+patchPredictions = ModelEvaluation.GetPredictions(patchProbabilities)
 
-(fileProbabilities, fileLabels, fileIdentifiers) = modelAggregator.CalculateJointProbability(patchProbabilities, patchLabels, patchIdentifiers)
-filePredictions = getPredictions(fileProbabilities)
+(patchAccuracy, patchMisclassified) = ModelEvaluation.CalculateAccuracy(patchPredictions, patchLabels)
+patchConfusionMatrix = ModelEvaluation.GetConfusionMatrix(patchPredictions, patchLabels, nClasses)
 
-(accuracy, misclassified) = accuracyCalculator.calc(filePredictions, fileLabels)
+predictionActivations = ModelEvaluation.GetPredictedClassActivations(patchPredictions)
+correctPredictionActivations = predictionActivations(numpy.asarray(patchPredictions) == patchLabels)
+incorrectPredictionActivations = predictionActivations(numpy.asarray(patchPredictions) != patchLabels)
 
-fileConfusionMatrix = confufionMatrix.generate(filePredictions, fileLabels)
+
+(fileProbabilities, fileLabels, fileIdentifiers) = ModelEvaluation.GetJointLogProbability(patchProbabilities, patchLabels, patchIdentifiers)
+filePredictions = ModelEvaluation.GetPredictions(fileProbabilities)
+
+(accuracy, misclassified) = ModelEvaluation.CalculateAccuracy(filePredictions, fileLabels)
+
+fileConfusionMatrix = ModelEvaluation.GetConfusionMatrix(filePredictions, fileLabels)
+
