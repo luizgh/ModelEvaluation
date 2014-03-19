@@ -13,7 +13,7 @@ class testModelAggregator(unittest.TestCase):
 
         listOfIds = [1, 2, 3]
         
-        self.assertTupleEqual((arrayEqualsTo(logProbabilities), labels, listOfIds), self.target.GetUnormalizedJointLogProbability(logProbabilities,labels, listOfIds))
+        self.assertTupleEqual((arrayEqualsTo(logProbabilities), labels, listOfIds), self.target.Aggregate(logProbabilities,labels, listOfIds))
         
     def testAggregateAllIntoOne(self):
         logProbabilities = numpy.arange(9).reshape(3,3)
@@ -21,7 +21,7 @@ class testModelAggregator(unittest.TestCase):
         listOfIds = ['my', 'my', 'my']
 
         expectedProbs = arrayEqualsTo(numpy.sum(logProbabilities, axis=0).reshape(-1,3))
-        result = self.target.GetUnormalizedJointLogProbability( logProbabilities,labels, listOfIds)
+        result = self.target.Aggregate( logProbabilities,labels, listOfIds)
 
         self.assertTupleEqual((expectedProbs, [1],['my']), result)
         
@@ -31,9 +31,9 @@ class testModelAggregator(unittest.TestCase):
         labels = [1,1,3]
         listOfIds = ['my', 'my', 'my']
 
-        self.assertRaises(ValueError, self.target.GetUnormalizedJointLogProbability, logProbabilities,labels, listOfIds)
+        self.assertRaises(ValueError, self.target.Aggregate, logProbabilities,labels, listOfIds)
         
-    def testAggregateMultiple(self):
+    def testAggregateMultipleWithSum(self):
         logProbabilities = numpy.asarray([ [1, 1, 1],
                                         [3, 3, 3],
                                         [2, 2, 2],
@@ -42,7 +42,20 @@ class testModelAggregator(unittest.TestCase):
         listOfIds = ['my1', 'my2','my1', 'my2']
         
         expected = arrayEqualsTo(numpy.asarray([[3, 3, 3], [7, 7, 7]]))
-        self.assertTupleEqual((expected, [1,2], ['my1', 'my2']), self.target.GetUnormalizedJointLogProbability(logProbabilities,labels, listOfIds))
+        self.assertTupleEqual((expected, [1,2], ['my1', 'my2']), self.target.Aggregate(logProbabilities,labels, listOfIds))
+    
+    def testAggregateMultipleWithMedian(self):
+        logProbabilities = numpy.asarray([ [1, 1, 1],
+                                        [3, 3, 3],
+                                        [2, 2, 2],
+                                        [0, 0, 0],
+                                        [4, 4, 4]])
+        labels = [1,2,1,1,2]
+        listOfIds = ['my1', 'my2','my1', 'my1', 'my2']
+        
+        expected = arrayEqualsTo(numpy.asarray([[1, 1, 1], [3.5, 3.5, 3.5]]))
+        self.assertTupleEqual((expected, [1,2], ['my1', 'my2']), self.target.Aggregate(logProbabilities,labels, listOfIds, numpy.median))
+
     
     def assertTupleEqual(self, t1,t2):
         for i in range(len(t1)):

@@ -25,14 +25,19 @@ class ModelEvaluation:
 	def GetJointLogProbability(logProbabilities, labels, ids):
 		modelAggregator = ModelAggregator()
 		normalizer = Normalizer()
-		unormalizedLogProbs = modelAggregator.GetUnormalizedJointLogProbability(logProbabilities, labels, ids)
+		unormalizedLogProbs, labels, ids = modelAggregator.Aggregate(logProbabilities, labels, ids)
 		
-		return normalizer.normalizeLogProbabilities(unormalizedLogProbs)
+		return (normalizer.normalizeLogProbabilities(unormalizedLogProbs), labels,ids)
 	
 	@staticmethod
 	def GetUnormalizedJointLogProbability(logProbabilities, labels, ids):
 		modelAggregator = ModelAggregator()
-		return modelAggregator.GetUnormalizedJointLogProbability(logProbabilities, labels, ids)
+		return modelAggregator.Aggregate(logProbabilities, labels, ids)
+	
+	@staticmethod
+	def AggregateProbabilities(logProbabilities, labels, ids, function):
+		modelAggregator = ModelAggregator()
+		return modelAggregator.Aggregate(logProbabilities, labels, ids, function)
 		
 	@staticmethod
 	def GetLogProbabilities(probabilities):
